@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demoapi
+spec:
+  selector:
+    matchLabels:
+      app: demoapi
+  replicas: 5
+  strategy:  
+    rollingUpdate:  
+      maxSurge: 1  
+      maxUnavailable: 1  
+  minReadySeconds: 5   
+  template:
+    metadata:
+      labels:
+        app: demoapi
+    spec:
+      containers:
+        - name: demoapi
+          image: stijnboss12/demoapi:latest
+          imagePullPolicy: "Always"
+          ports:
+            - containerPort: 80
+              protocol: TCP          
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: demoapi
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    nodePort: 30663
+  selector:
+    app: demoapi
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#     name: demoapi-ingress
+# spec:
+#     rules:
+#     - http:
+#         paths:
+#         - path: /demo
+#           pathType: Prefix
+#           backend:
+#             service:
+#               name: demoapi-service
+#               port:
+#                 number: 80
+---                
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demoapp
+spec:
+  selector:
+    matchLabels:
+      app: demoapp
+  replicas: 2
+  strategy:  
+    rollingUpdate:  
+      maxSurge: 1  
+      maxUnavailable: 1  
+  minReadySeconds: 5   
+  template:
+    metadata:
+      labels:
+        app: demoapp
+    spec:
+      containers:
+        - name: demoapp
+          image: stijnboss12/demoapp:latest
+          imagePullPolicy: "Always"
+          ports:
+            - containerPort: 80
+              protocol: TCP           
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: demoapp
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    nodePort: 30664
+  selector:
+    app: demoapp
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#     name: demo-ingress
+# spec:
+#     rules:
+#     - host: demo.info
+#       http:
+#         paths:
+#         - path: /
+#           pathType: Prefix
+#           backend:
+#             service:
+#               name: demoapp-service
+#               port:
+#                 number: 80  
